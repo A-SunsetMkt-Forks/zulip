@@ -818,17 +818,14 @@ class BillingSession(ABC):
         setup_payment_by_invoice: bool = False,
     ) -> str:
         customer = self.get_customer()
-        if setup_payment_by_invoice and (
-            customer is None or customer.stripe_customer_id is None
-        ):  # nocoverage
+        if customer is None or customer.stripe_customer_id is None:  # nocoverage
             customer = self.create_stripe_customer()
 
-        assert customer is not None and customer.stripe_customer_id is not None
+        assert customer.stripe_customer_id is not None
 
-        if return_to_billing_page:
+        if return_to_billing_page or tier is None:
             return_url = f"{self.billing_session_url}/billing/"
         else:
-            assert tier is not None
             base_return_url = f"{self.billing_session_url}/upgrade/"
             params = {
                 "manual_license_management": str(manual_license_management).lower(),
